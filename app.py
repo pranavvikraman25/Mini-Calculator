@@ -1,10 +1,7 @@
-#!/usr/bin/env python3
-# Simple safe calculator REPL
-
+import streamlit as st
 import ast
 import operator as op
 import math
-import sys
 
 # allowed binary operators
 BIN_OPS = {
@@ -48,12 +45,12 @@ class SafeEval(ast.NodeVisitor):
     def visit_Expr(self, node):
         return self.visit(node.value)
 
-    def visit_Constant(self, node):  # Python 3.8+
+    def visit_Constant(self, node):
         if isinstance(node.value, (int, float)):
             return node.value
         raise ValueError("Only numbers are allowed")
 
-    def visit_Num(self, node):  # For older Python versions
+    def visit_Num(self, node):
         return node.n
 
     def visit_BinOp(self, node):
@@ -96,30 +93,15 @@ def evaluate(expr):
     except Exception as e:
         raise ValueError(f"Invalid expression: {e}")
 
-def repl():
-    print("Calculator — type 'exit' or 'quit' to leave. Functions: sin, cos, sqrt, log, etc.")
-    try:
-        while True:
-            try:
-                s = input("calc> ").strip()
-            except EOFError:
-                print()
-                break
-            if not s:
-                continue
-            if s.lower() in ('exit', 'quit'):
-                break
-            if s.lower() in ('help', '?'):
-                print("Enter arithmetic expressions. Examples: 2+2, 3*sqrt(2), sin(pi/2), pow(2,3)")
-                continue
-            try:
-                result = evaluate(s)
-                print(result)
-            except ValueError as e:
-                print("Error:", e)
-    except KeyboardInterrupt:
-        print()
-    print("Bye.")
+# --- Streamlit UI ---
+st.title("🧮 Safe Math Calculator")
+st.write("Enter expressions like `2+2`, `3*sqrt(2)`, `sin(pi/2)`, `pow(2,3)`")
 
-if __name__ == "__main__":
-    repl()
+expr = st.text_input("Expression:")
+
+if expr:
+    try:
+        result = evaluate(expr)
+        st.success(f"Result: {result}")
+    except ValueError as e:
+        st.error(e)
